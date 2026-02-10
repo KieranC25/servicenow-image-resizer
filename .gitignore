@@ -1,0 +1,24 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment / secrets
+.env
+.env.*
+.dev.vars
+
+# Wrangler local state
+.wrangler/
+node_modules/
+
+# Claude Code local settings
+.claude/
