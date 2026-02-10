@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ServiceNow Image Resizer</title>
+  <script src="https://unpkg.com/pica@9.0.1/dist/pica.min.js"
+          integrity="sha384-erKD4aAW95PJjutWX+eFrsIh9Kl6k9mLJ89rDrWhF2/EvCdxqe2aR5tDaI4SIFl/"
+          crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-raised: #ffffff;
+      --bg-surface: #f5f5f0;
+      --bg-hover: #eeeee8;
+      --border: #ddd9d0;
+      --border-subtle: #e8e5de;
+      --text: #1a1a1a;
+      --text-muted: #555550;
+      --text-dim: #8a8880;
+      --accent: #2563eb;
+      --accent-glow: #2563eb14;
+      --accent-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #16a34a12;
+      --warning: #ca8a04;
+      --warning-bg: #ca8a0412;
+      --error: #dc2626;
+      --error-bg: #dc262612;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --font-display: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+      --transition: 150ms ease;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-surface);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-brand-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+    .nav-brand-text {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .nav-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-left: 0.5rem;
+      padding-left: 0.75rem;
+      border-left: 1px solid var(--border);
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--text);
+    }
+    .page-header p {
+      margin-top: 0.3rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .container { padding: 1.25rem; }
+      .nav-inner { padding: 0 1.25rem; }
+      .nav-subtitle { display: none; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .card:hover {
+      border-color: #ccc8c0;
+      box-shadow: var(--shadow-md);
+    }
+    .card-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Drop zone */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: var(--bg-raised);
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .dropzone.dragover {
+      transform: scale(1.01);
+    }
+    .dropzone-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.25rem;
+      border-radius: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      transition: all 0.25s ease;
+    }
+    .dropzone:hover .dropzone-icon {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .dropzone:hover .dropzone-icon svg {
+      stroke: var(--bg);
+    }
+    .dropzone-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--text-muted);
+      transition: stroke 0.25s ease;
+    }
+    .dropzone h3 {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 550;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .dropzone p {
+      font-size: 0.83rem;
+      color: var(--text-dim);
+    }
+    .dropzone input[type="file"] {
+      display: none;
+    }
+    .file-types {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .file-types span {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      color: var(--text-dim);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Info badges */
+    .info-badge {
+      padding: 0.5rem 0.85rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: none;
+    }
+    .info-badge.visible {
+      display: block;
+    }
+    .info-badge strong {
+      color: var(--text);
+      font-weight: 550;
+    }
+
+    .output-badge {
+      padding: 0.5rem 0.85rem;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .output-badge strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .format-note {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--warning);
+      margin-top: 0.25rem;
+    }
+
+    /* Controls */
+    .controls {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .controls.visible {
+      display: flex;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      min-width: 80px;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.85rem;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: all var(--transition);
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .dimensions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex: 1;
+    }
+    .dimensions input {
+      width: 100%;
+    }
+    .dimensions span {
+      color: var(--text-dim);
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+    .checkbox-row label {
+      min-width: auto;
+      text-transform: none;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .help-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.125rem;
+      margin-left: 88px;
+    }
+
+    /* Background options */
+    .bg-options {
+      display: flex;
+      gap: 0.375rem;
+      flex: 1;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .bg-option {
+      padding: 0.375rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .bg-option:hover {
+      border-color: var(--accent);
+    }
+    .bg-option.active {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+    #bgCustom {
+      width: 32px;
+      height: 32px;
+      padding: 2px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      cursor: pointer;
+    }
+    #bgCustom:hover {
+      border-color: var(--accent);
+    }
+
+    /* Warning */
+    .warning {
+      padding: 0.6rem 0.85rem;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning);
+      border-left: 3px solid var(--warning);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      color: var(--warning);
+      display: none;
+    }
+    .warning.visible {
+      display: block;
+    }
+
+    /* Preview section */
+    .preview-section {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .preview-section.visible {
+      display: flex;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .preview-header span:first-child {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+    .preview-info {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    .preview-container {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 280px;
+      position: relative;
+      background-image:
+        linear-gradient(45deg, var(--bg-surface) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--bg-surface) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--bg-surface) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--bg-surface) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    .preview-container.loading::after {
+      content: '';
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    #preview {
+      max-width: 100%;
+      max-height: 350px;
+      border-radius: 4px;
+      box-shadow: var(--shadow-md);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.15rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 550;
+      font-family: var(--font-body);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all var(--transition);
+      text-decoration: none;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+    }
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-surface);
+      color: var(--text);
+      border-color: #ccc8c0;
+    }
+    .btn-success {
+      background: var(--success) !important;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .button-row .btn {
+      flex: 1;
+    }
+
+    /* Batch export */
+    .batch-export {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .batch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 550;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .batch-header:hover {
+      color: var(--text);
+      background: var(--bg-surface);
+    }
+    .batch-toggle {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 0;
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+    .batch-toggle.open {
+      transform: rotate(180deg);
+    }
+    .batch-content {
+      padding: 1rem 1.1rem;
+      border-top: 1px solid var(--border);
+    }
+    .batch-content.hidden {
+      display: none;
+    }
+    .batch-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .batch-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .batch-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+    .batch-settings {
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    #exportAllBtn {
+      width: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: fadeUp 0.3s ease both;
+    }
+    .delay-1 { animation-delay: 0.04s; }
+    .delay-2 { animation-delay: 0.08s; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <span class="nav-brand-icon">I</span>
+        <span class="nav-brand-text">ServiceNow Image Resizer</span>
+        <span class="nav-subtitle">Lanczos3 quality &middot; KB0696767 compliant</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header animate-in">
+      <h1>Resize Images for Knowledge Base</h1>
+      <p>Prepare images for ServiceNow KB articles with professional-grade Lanczos3 resampling. Everything happens in your browser.</p>
+    </div>
+
+    <div class="main-layout">
+      <div class="left-panel animate-in delay-1">
+        <div class="card">
+          <div class="card-header">Upload Image</div>
+
+          <div class="dropzone" id="dropZone">
+            <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.gif,image/png,image/jpeg,image/gif">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <h3>Choose a file or drag it here</h3>
+            <p>You can also paste from clipboard</p>
+            <div class="file-types">
+              <span>PNG</span><span>JPG</span><span>GIF</span>
+            </div>
+          </div>
+
+          <div class="info-badge" id="originalInfo" style="margin-top: 1rem;">
+            Original: <strong id="originalDimensions"></strong>
+          </div>
+
+          <div class="controls" id="controls" style="margin-top: 1rem;">
+            <div class="control-row">
+              <label>Preset</label>
+              <select id="presetSelect">
+                <option value="thumbnail">Thumbnail (max 150 &times; 150)</option>
+                <option value="medium">Medium (max 300 &times; 200)</option>
+                <option value="large">Large (max 600 &times; 600)</option>
+                <option value="portal-max">Knowledge Portal (max 840px wide)</option>
+                <option value="legacy-max">Legacy View (max 960px wide)</option>
+                <option value="custom">Custom dimensions</option>
+              </select>
+            </div>
+
+            <div class="control-row" id="padRow">
+              <label></label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="padToFit">
+                <label for="padToFit">Pad to exact size</label>
+              </div>
+            </div>
+
+            <div class="control-row hidden" id="bgColorRow">
+              <label>Background</label>
+              <div class="bg-options">
+                <button type="button" class="bg-option active" id="bgAuto" data-bg="auto">Auto-detect</button>
+                <button type="button" class="bg-option" id="bgWhite" data-bg="#ffffff">White</button>
+                <button type="button" class="bg-option" id="bgBlack" data-bg="#000000">Black</button>
+                <input type="color" id="bgCustom" value="#ffffff" title="Custom color">
+              </div>
+            </div>
+
+            <div class="output-badge" id="outputInfo">
+              Output: <strong id="outputDimensions"></strong>
+              <span id="formatNote" class="format-note"></span>
+            </div>
+
+            <div class="control-row hidden" id="customDimensions">
+              <label>Size</label>
+              <div class="dimensions">
+                <input type="number" id="widthInput" placeholder="Width" min="1">
+                <span>&times;</span>
+                <input type="number" id="heightInput" placeholder="Height" min="1">
+              </div>
+            </div>
+
+            <div class="control-row hidden" id="aspectRow">
+              <label></label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="lockAspect" checked>
+                <label for="lockAspect">Lock aspect ratio</label>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <label>Format</label>
+              <select id="formatSelect">
+                <option value="original">Same as original</option>
+                <option value="png">PNG (best for screenshots/graphics)</option>
+                <option value="jpeg">JPG (best for photos)</option>
+              </select>
+            </div>
+
+            <div class="control-row">
+              <label>Filename</label>
+              <input type="text" id="filenameInput" placeholder="image-name">
+            </div>
+            <p class="help-text">Letters, numbers, hyphens, and underscores only</p>
+
+            <div class="warning" id="upscaleWarning">
+              Upscaling not recommended. ServiceNow advises resizing images <strong>before</strong> uploading, not enlarging them after.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel animate-in delay-2">
+        <div class="preview-section" id="previewSection">
+          <div class="card" style="padding: 1rem;">
+            <div class="preview-header">
+              <span>Preview</span>
+              <span class="preview-info" id="previewInfo"></span>
+            </div>
+            <div class="preview-container" style="margin-top: 0.75rem;">
+              <img id="preview" alt="Preview">
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-secondary" id="resetBtn">Reset</button>
+            <button class="btn btn-primary" id="copyBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+            <button class="btn btn-primary" id="downloadBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+          </div>
+
+          <div class="batch-export">
+            <div class="batch-header" id="batchHeader">
+              <span>Batch Export</span>
+              <button type="button" class="batch-toggle" id="batchToggle">&#9660;</button>
+            </div>
+            <div class="batch-content hidden" id="batchContent">
+              <div class="batch-options">
+                <label class="batch-option">
+                  <input type="checkbox" value="thumbnail" checked> Thumbnail (150&times;150)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="medium" checked> Medium (300&times;200)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="large" checked> Large (600&times;600)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="portal-max"> Portal Max (840px)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="legacy-max"> Legacy Max (960px)
+                </label>
+              </div>
+              <div class="batch-settings">
+                <label class="batch-option">
+                  <input type="checkbox" id="batchPad"> Pad to exact size
+                </label>
+              </div>
+              <button class="btn btn-primary" id="exportAllBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const controls = document.getElementById('controls');
+    const previewSection = document.getElementById('previewSection');
+    const preview = document.getElementById('preview');
+    const previewInfo = document.getElementById('previewInfo');
+    const presetSelect = document.getElementById('presetSelect');
+    const customDimensions = document.getElementById('customDimensions');
+    const aspectRow = document.getElementById('aspectRow');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const lockAspect = document.getElementById('lockAspect');
+    const formatSelect = document.getElementById('formatSelect');
+    const filenameInput = document.getElementById('filenameInput');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const padToFit = document.getElementById('padToFit');
+    const padRow = document.getElementById('padRow');
+    const bgColorRow = document.getElementById('bgColorRow');
+    const bgAuto = document.getElementById('bgAuto');
+    const bgWhite = document.getElementById('bgWhite');
+    const bgBlack = document.getElementById('bgBlack');
+    const bgCustom = document.getElementById('bgCustom');
+    const originalInfo = document.getElementById('originalInfo');
+    const originalDimensions = document.getElementById('originalDimensions');
+    const outputInfo = document.getElementById('outputInfo');
+    const outputDimensions = document.getElementById('outputDimensions');
+    const formatNote = document.getElementById('formatNote');
+    const upscaleWarning = document.getElementById('upscaleWarning');
+
+    let originalImage = null;
+    let originalWidth = 0;
+    let originalHeight = 0;
+    let originalFormat = 'png';
+    let currentCanvas = null;
+    let bgMode = 'auto';
+
+    // Initialize Pica with high quality settings
+    const picaInstance = pica({
+      features: ['js', 'wasm', 'ww'],
+    });
+
+    const presets = {
+      'thumbnail': { maxWidth: 150, maxHeight: 150 },
+      'medium': { maxWidth: 300, maxHeight: 200 },
+      'large': { maxWidth: 600, maxHeight: 600 },
+      'portal-max': { maxWidth: 840, maxHeight: null },
+      'legacy-max': { maxWidth: 960, maxHeight: null }
+    };
+
+    function sanitizeFilename(name) {
+      return name
+        .replace(/[^a-zA-Z0-9\-_]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase() || 'image';
+    }
+
+    // Drag and drop handlers
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      if (!isValidFormat(file)) {
+        alert('Please use JPG, PNG, or GIF format only. Other formats like WebP, PDF, PSD are not supported by ServiceNow.');
+      } else if (!isValidSize(file)) {
+        // Alert already shown
+      } else {
+        loadImage(file);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!isValidFormat(file)) {
+        alert('Please use JPG, PNG, or GIF format only.');
+        fileInput.value = '';
+      } else if (!isValidSize(file)) {
+        fileInput.value = '';
+      } else {
+        loadImage(file);
+      }
+    });
+
+    // Paste from clipboard
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) break;
+          if (!isValidFormat(file)) {
+            alert('Please use JPG, PNG, or GIF format only.');
+          } else if (!isValidSize(file)) {
+            // Alert already shown
+          } else {
+            loadImage(file);
+          }
+          break;
+        }
+      }
+    });
+
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+    function isValidFormat(file) {
+      const validTypes = ['image/png', 'image/jpeg', 'image/gif'];
+      return validTypes.includes(file.type);
+    }
+
+    function isValidSize(file) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`File too large (${Math.round(file.size / 1024 / 1024)}MB). Maximum size is 20MB.`);
+        return false;
+      }
+      return true;
+    }
+
+    function loadImage(file) {
+      const rawName = file.name ? file.name.replace(/\.[^/.]+$/, '') : '';
+      const defaultName = rawName && rawName !== 'image' ? rawName : `image-${Date.now()}`;
+      filenameInput.value = sanitizeFilename(defaultName);
+
+      const type = file.type.split('/')[1];
+      originalFormat = type === 'jpeg' ? 'jpeg' : type === 'gif' ? 'gif' : 'png';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          originalImage = img;
+          originalWidth = img.width;
+          originalHeight = img.height;
+
+          originalDimensions.textContent = `${originalWidth} × ${originalHeight}px`;
+          originalInfo.classList.add('visible');
+
+          selectBestPreset();
+
+          controls.classList.add('visible');
+          previewSection.classList.add('visible');
+
+          updateFormatNote();
+          updatePreview();
+        };
+        img.onerror = () => {
+          alert('Failed to load image. The file may be corrupted.');
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        alert('Failed to read file. Please try again.');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function selectBestPreset() {
+      if (originalWidth <= 150 && originalHeight <= 150) {
+        presetSelect.value = 'thumbnail';
+      } else if (originalWidth <= 300 && originalHeight <= 200) {
+        presetSelect.value = 'medium';
+      } else if (originalWidth <= 600 && originalHeight <= 600) {
+        presetSelect.value = 'large';
+      } else if (originalWidth <= 840) {
+        presetSelect.value = 'portal-max';
+      } else if (originalWidth <= 960) {
+        presetSelect.value = 'legacy-max';
+      } else {
+        presetSelect.value = 'portal-max';
+      }
+      applyPreset();
+    }
+
+    function applyPreset() {
+      const preset = presets[presetSelect.value];
+      const isCustom = presetSelect.value === 'custom';
+      const hasFixedSize = preset && preset.maxHeight !== null;
+
+      customDimensions.classList.toggle('hidden', !isCustom);
+      aspectRow.classList.toggle('hidden', !isCustom);
+
+      padRow.classList.toggle('hidden', !hasFixedSize && !isCustom);
+      if (!hasFixedSize && !isCustom) {
+        padToFit.checked = false;
+        bgColorRow.classList.add('hidden');
+      }
+
+      if (preset) {
+        const aspectRatio = originalWidth / originalHeight;
+        let newWidth, newHeight;
+
+        if (preset.maxHeight === null) {
+          newWidth = Math.min(preset.maxWidth, originalWidth);
+          newHeight = Math.round(newWidth / aspectRatio);
+        } else {
+          const maxWidth = Math.min(preset.maxWidth, originalWidth);
+          const maxHeight = Math.min(preset.maxHeight, originalHeight);
+
+          if (aspectRatio > maxWidth / maxHeight) {
+            newWidth = maxWidth;
+            newHeight = Math.round(maxWidth / aspectRatio);
+          } else {
+            newHeight = maxHeight;
+            newWidth = Math.round(maxHeight * aspectRatio);
+          }
+        }
+
+        widthInput.value = newWidth;
+        heightInput.value = newHeight;
+        lockAspect.checked = true;
+      }
+
+      checkUpscale();
+      updatePreview();
+    }
+
+    presetSelect.addEventListener('change', applyPreset);
+
+    widthInput.addEventListener('input', () => {
+      if (lockAspect.checked && originalWidth) {
+        const ratio = originalHeight / originalWidth;
+        heightInput.value = Math.round(widthInput.value * ratio);
+      }
+      checkUpscale();
+      updatePreview();
+    });
+
+    heightInput.addEventListener('input', () => {
+      if (lockAspect.checked && originalHeight) {
+        const ratio = originalWidth / originalHeight;
+        widthInput.value = Math.round(heightInput.value * ratio);
+      }
+      checkUpscale();
+      updatePreview();
+    });
+
+    filenameInput.addEventListener('input', () => {
+      const sanitized = sanitizeFilename(filenameInput.value);
+      if (sanitized !== filenameInput.value) {
+        filenameInput.value = sanitized;
+      }
+    });
+
+    formatSelect.addEventListener('change', () => {
+      updateFormatNote();
+      updatePreview();
+    });
+
+    padToFit.addEventListener('change', () => {
+      bgColorRow.classList.toggle('hidden', !padToFit.checked);
+      updatePreview();
+    });
+
+    document.querySelectorAll('.bg-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bg-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        bgMode = btn.dataset.bg;
+        updatePreview();
+      });
+    });
+
+    bgCustom.addEventListener('input', () => {
+      document.querySelectorAll('.bg-option').forEach(b => b.classList.remove('active'));
+      bgMode = bgCustom.value;
+      updatePreview();
+    });
+
+    function updateFormatNote() {
+      const format = formatSelect.value === 'original' ? originalFormat : formatSelect.value;
+      if (originalFormat === 'gif' && format === 'gif') {
+        formatNote.textContent = 'GIF will be exported as PNG (browser limitation)';
+      } else {
+        formatNote.textContent = '';
+      }
+    }
+
+    function checkUpscale() {
+      const width = parseInt(widthInput.value) || 0;
+      const height = parseInt(heightInput.value) || 0;
+      const isUpscaling = width > originalWidth || height > originalHeight;
+      upscaleWarning.classList.toggle('visible', isUpscaling);
+    }
+
+    let resizeTimeout = null;
+    let isResizing = false;
+    let pendingResize = false;
+    const previewContainer = document.querySelector('.preview-container');
+
+    function updatePreview() {
+      let width = parseInt(widthInput.value) || originalWidth;
+      let height = parseInt(heightInput.value) || originalHeight;
+
+      if (padToFit.checked) {
+        const preset = presets[presetSelect.value];
+        if (preset && preset.maxHeight !== null) {
+          width = preset.maxWidth;
+          height = preset.maxHeight;
+        }
+      }
+
+      previewInfo.textContent = `${width} × ${height}px`;
+      outputDimensions.textContent = `${width} × ${height}px`;
+
+      clearTimeout(resizeTimeout);
+
+      if (isResizing) {
+        pendingResize = true;
+        return;
+      }
+
+      resizeTimeout = setTimeout(() => doResize(), 150);
+    }
+
+    function detectEdgeColor(canvas) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const samples = [];
+      const sampleCount = 10;
+
+      for (let i = 0; i < sampleCount; i++) {
+        const x = Math.floor((w / sampleCount) * i);
+        samples.push(ctx.getImageData(x, 0, 1, 1).data);
+        samples.push(ctx.getImageData(x, h - 1, 1, 1).data);
+      }
+
+      for (let i = 0; i < sampleCount; i++) {
+        const y = Math.floor((h / sampleCount) * i);
+        samples.push(ctx.getImageData(0, y, 1, 1).data);
+        samples.push(ctx.getImageData(w - 1, y, 1, 1).data);
+      }
+
+      let r = 0, g = 0, b = 0;
+      for (const pixel of samples) {
+        r += pixel[0];
+        g += pixel[1];
+        b += pixel[2];
+      }
+      r = Math.round(r / samples.length);
+      g = Math.round(g / samples.length);
+      b = Math.round(b / samples.length);
+
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    async function doResize() {
+      if (!originalImage) return;
+      if (isResizing) {
+        pendingResize = true;
+        return;
+      }
+
+      isResizing = true;
+      pendingResize = false;
+
+      previewContainer.classList.add('loading');
+
+      const fitWidth = parseInt(widthInput.value) || originalWidth;
+      const fitHeight = parseInt(heightInput.value) || originalHeight;
+      const format = formatSelect.value === 'original' ? originalFormat : formatSelect.value;
+      const shouldPad = padToFit.checked;
+      const preset = presets[presetSelect.value];
+
+      const sourceCanvas = document.createElement('canvas');
+      sourceCanvas.width = originalWidth;
+      sourceCanvas.height = originalHeight;
+      const sourceCtx = sourceCanvas.getContext('2d');
+      sourceCtx.drawImage(originalImage, 0, 0);
+
+      const resizedCanvas = document.createElement('canvas');
+      resizedCanvas.width = fitWidth;
+      resizedCanvas.height = fitHeight;
+
+      try {
+        await picaInstance.resize(sourceCanvas, resizedCanvas, {
+          quality: 3,
+          unsharpAmount: 80,
+          unsharpRadius: 0.6,
+          unsharpThreshold: 2
+        });
+
+        let finalCanvas;
+
+        if (shouldPad && preset && preset.maxHeight !== null) {
+          const padWidth = preset.maxWidth;
+          const padHeight = preset.maxHeight;
+
+          finalCanvas = document.createElement('canvas');
+          finalCanvas.width = padWidth;
+          finalCanvas.height = padHeight;
+          const finalCtx = finalCanvas.getContext('2d');
+
+          let bgColor;
+          if (bgMode === 'auto') {
+            bgColor = detectEdgeColor(resizedCanvas);
+          } else {
+            bgColor = bgMode;
+          }
+
+          finalCtx.fillStyle = bgColor;
+          finalCtx.fillRect(0, 0, padWidth, padHeight);
+
+          const offsetX = Math.round((padWidth - fitWidth) / 2);
+          const offsetY = Math.round((padHeight - fitHeight) / 2);
+          finalCtx.drawImage(resizedCanvas, offsetX, offsetY);
+        } else {
+          finalCanvas = resizedCanvas;
+        }
+
+        currentCanvas = finalCanvas;
+
+        let mimeType, quality;
+        if (format === 'jpeg') {
+          mimeType = 'image/jpeg';
+          quality = 0.92;
+        } else {
+          mimeType = 'image/png';
+          quality = undefined;
+        }
+
+        preview.src = finalCanvas.toDataURL(mimeType, quality);
+      } catch (err) {
+        console.error('Pica resize failed:', err);
+      }
+
+      previewContainer.classList.remove('loading');
+      isResizing = false;
+
+      if (pendingResize) {
+        pendingResize = false;
+        doResize();
+      }
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!currentCanvas) return;
+
+      const format = formatSelect.value === 'original' ? originalFormat : formatSelect.value;
+      let extension, mimeType, quality;
+
+      if (format === 'jpeg') {
+        extension = 'jpg';
+        mimeType = 'image/jpeg';
+        quality = 0.92;
+      } else {
+        extension = 'png';
+        mimeType = 'image/png';
+      }
+
+      const filename = filenameInput.value || 'image';
+
+      const link = document.createElement('a');
+      link.download = `${filename}.${extension}`;
+      link.href = currentCanvas.toDataURL(mimeType, quality);
+      link.click();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      if (!currentCanvas) return;
+
+      try {
+        const blob = await new Promise(resolve => {
+          currentCanvas.toBlob(resolve, 'image/png');
+        });
+
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        copyBtn.classList.add('btn-success');
+
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+          copyBtn.classList.remove('btn-success');
+        }, 1500);
+      } catch (err) {
+        console.error('Copy failed:', err);
+        alert('Copy failed. Your browser may not support clipboard access.');
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      originalImage = null;
+      currentCanvas = null;
+      fileInput.value = '';
+      controls.classList.remove('visible');
+      previewSection.classList.remove('visible');
+      originalInfo.classList.remove('visible');
+      upscaleWarning.classList.remove('visible');
+      presetSelect.value = 'thumbnail';
+      customDimensions.classList.add('hidden');
+      aspectRow.classList.add('hidden');
+      formatSelect.value = 'original';
+      filenameInput.value = '';
+      outputDimensions.textContent = '';
+      formatNote.textContent = '';
+      padToFit.checked = false;
+      bgColorRow.classList.add('hidden');
+      bgMode = 'auto';
+      document.querySelectorAll('.bg-option').forEach(b => b.classList.remove('active'));
+      bgAuto.classList.add('active');
+    });
+
+    // Batch export functionality
+    const batchToggle = document.getElementById('batchToggle');
+    const batchContent = document.getElementById('batchContent');
+    const batchHeader = document.getElementById('batchHeader');
+    const exportAllBtn = document.getElementById('exportAllBtn');
+    const batchPad = document.getElementById('batchPad');
+
+    batchHeader.addEventListener('click', () => {
+      batchContent.classList.toggle('hidden');
+      batchToggle.classList.toggle('open');
+    });
+
+    async function resizeForPreset(presetName, shouldPad, bgColor) {
+      const preset = presets[presetName];
+      if (!preset) return null;
+
+      const aspectRatio = originalWidth / originalHeight;
+      let fitWidth, fitHeight;
+
+      if (preset.maxHeight === null) {
+        fitWidth = Math.min(preset.maxWidth, originalWidth);
+        fitHeight = Math.round(fitWidth / aspectRatio);
+      } else {
+        const maxWidth = Math.min(preset.maxWidth, originalWidth);
+        const maxHeight = Math.min(preset.maxHeight, originalHeight);
+
+        if (aspectRatio > maxWidth / maxHeight) {
+          fitWidth = maxWidth;
+          fitHeight = Math.round(maxWidth / aspectRatio);
+        } else {
+          fitHeight = maxHeight;
+          fitWidth = Math.round(maxHeight * aspectRatio);
+        }
+      }
+
+      const sourceCanvas = document.createElement('canvas');
+      sourceCanvas.width = originalWidth;
+      sourceCanvas.height = originalHeight;
+      sourceCanvas.getContext('2d').drawImage(originalImage, 0, 0);
+
+      const resizedCanvas = document.createElement('canvas');
+      resizedCanvas.width = fitWidth;
+      resizedCanvas.height = fitHeight;
+
+      await picaInstance.resize(sourceCanvas, resizedCanvas, {
+        quality: 3,
+        unsharpAmount: 80,
+        unsharpRadius: 0.6,
+        unsharpThreshold: 2
+      });
+
+      if (shouldPad && preset.maxHeight !== null) {
+        const padWidth = preset.maxWidth;
+        const padHeight = preset.maxHeight;
+
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = padWidth;
+        finalCanvas.height = padHeight;
+        const ctx = finalCanvas.getContext('2d');
+
+        let bg = bgColor;
+        if (bg === 'auto') {
+          bg = detectEdgeColor(resizedCanvas);
+        }
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, padWidth, padHeight);
+
+        const offsetX = Math.round((padWidth - fitWidth) / 2);
+        const offsetY = Math.round((padHeight - fitHeight) / 2);
+        ctx.drawImage(resizedCanvas, offsetX, offsetY);
+
+        return finalCanvas;
+      }
+
+      return resizedCanvas;
+    }
+
+    exportAllBtn.addEventListener('click', async () => {
+      if (!originalImage) return;
+
+      const selectedPresets = Array.from(
+        batchContent.querySelectorAll('.batch-options input:checked')
+      ).map(cb => cb.value);
+
+      if (selectedPresets.length === 0) {
+        alert('Please select at least one size to export.');
+        return;
+      }
+
+      const shouldPad = batchPad.checked;
+      const format = formatSelect.value === 'original' ? originalFormat : formatSelect.value;
+      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      const extension = format === 'jpeg' ? 'jpg' : 'png';
+      const quality = format === 'jpeg' ? 0.92 : undefined;
+      const filename = filenameInput.value || 'image';
+
+      exportAllBtn.disabled = true;
+      const originalHTML = exportAllBtn.innerHTML;
+      exportAllBtn.innerHTML = 'Exporting...';
+
+      for (let i = 0; i < selectedPresets.length; i++) {
+        const presetName = selectedPresets[i];
+        exportAllBtn.innerHTML = `Exporting ${i + 1}/${selectedPresets.length}...`;
+
+        try {
+          const canvas = await resizeForPreset(presetName, shouldPad, bgMode);
+          if (canvas) {
+            const link = document.createElement('a');
+            link.download = `${filename}-${presetName}.${extension}`;
+            link.href = canvas.toDataURL(mimeType, quality);
+            link.click();
+
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+        } catch (err) {
+          console.error(`Failed to export ${presetName}:`, err);
+        }
+      }
+
+      exportAllBtn.disabled = false;
+      exportAllBtn.innerHTML = originalHTML;
+    });
+  </script>
+</body>
+</html>
