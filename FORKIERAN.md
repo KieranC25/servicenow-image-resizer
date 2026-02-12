@@ -1,44 +1,70 @@
-# FORKIERAN.md - ServiceNow Image Resizer
+# FORKIERAN.md - ServiceNow Image Tools
 
-*A personal learning journal for the ServiceNow Image Resizer project*
+*A personal learning journal for the ServiceNow Image Tools project*
 
 ---
 
 ## What Is This Thing, Actually?
 
-This is a purpose-built tool for preparing images for ServiceNow Knowledge Base articles. ServiceNow has specific requirements (documented in KB0696767) about what images you can upload - wrong format? Rejected. Too big? Looks terrible. Weird filename? Causes problems.
+This is a purpose-built tool for preparing images for ServiceNow Knowledge Base articles. It has two columns:
 
-Instead of remembering all these rules and manually resizing in Photoshop, this tool enforces the rules automatically:
+**Left Column - Image Resizer:** Upload your own images and resize them to meet ServiceNow's requirements (KB0696767). Drag & drop, paste from clipboard, or click to upload.
+
+**Right Column - Brand Logo Fetcher:** Search for company logos using the Brandfetch API. Get high-quality SVG/PNG logos with multiple variants (icon, logo, symbol) in light and dark themes.
+
+Both columns have the same resize presets and export options, so whether you're uploading a screenshot or fetching a vendor logo, the workflow is consistent.
+
+ServiceNow has specific requirements about what images you can upload - wrong format? Rejected. Too big? Looks terrible. Weird filename? Causes problems. This tool enforces the rules automatically:
 - Only accepts the three formats ServiceNow allows (JPG, PNG, GIF)
 - Offers preset bounding boxes that fit images while preserving aspect ratio
 - Sanitizes filenames to only valid characters
 - Warns you if you try to upscale (which ServiceNow explicitly says not to do)
 
-The magic is that it all happens right in your browser - images never leave your machine. Perfect for potentially sensitive KB content.
+The magic is that image processing happens right in your browser - images never leave your machine. The only network request is for brand logo search, which goes through a secure server-side proxy.
 
 ---
 
 ## The Big Picture: How It All Fits Together
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      YOUR BROWSER                        │
-│                                                          │
-│  ┌──────────┐    ┌───────────┐    ┌──────────────────┐  │
-│  │  Image   │───▶│  Canvas   │───▶│ Download Button  │  │
-│  │  Input   │    │  (resize) │    │   (save file)    │  │
-│  └──────────┘    └───────────┘    └──────────────────┘  │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-              ┌─────────────────────────┐
-              │    Cloudflare Pages     │
-              │   (just serves files)   │
-              └─────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                            YOUR BROWSER                                 │
+│                                                                         │
+│  ┌─────────────────────────┐    ┌─────────────────────────┐            │
+│  │    LEFT: Upload Image   │    │   RIGHT: Brand Search   │            │
+│  │  ┌───────┐   ┌───────┐ │    │  ┌───────┐   ┌───────┐  │            │
+│  │  │ Drop/ │──▶│ Pica  │ │    │  │Search │──▶│ Pica  │  │            │
+│  │  │ Paste │   │Resize │ │    │  │Brands │   │Resize │  │            │
+│  │  └───────┘   └───┬───┘ │    │  └───┬───┘   └───┬───┘  │            │
+│  └──────────────────┼─────┘    └──────┼───────────┼──────┘            │
+│                     │                 │           │                    │
+│                     ▼                 │           ▼                    │
+│              ┌─────────────────────┐  │   ┌─────────────────────┐     │
+│              │Download / Copy / Batch│  │   │Download / Copy / Batch│  │
+│              └─────────────────────┘  │   └─────────────────────┘     │
+│                                       │                                │
+└───────────────────────────────────────┼────────────────────────────────┘
+                                        │
+                                        ▼
+              ┌─────────────────────────────────────────┐
+              │           Cloudflare Pages              │
+              │  ┌──────────────┐  ┌────────────────┐  │
+              │  │ Static Files │  │ Pages Function │  │
+              │  │  index.html  │  │  /api/brand*   │  │
+              │  └──────────────┘  └───────┬────────┘  │
+              └────────────────────────────┼───────────┘
+                                           │
+                                           ▼
+                              ┌─────────────────────┐
+                              │   Brandfetch API    │
+                              │  (logo database)    │
+                              └─────────────────────┘
 ```
 
-The beautiful simplicity here: Cloudflare just serves static files. There's no server processing images, no database, no API calls. The browser does all the heavy lifting.
+The architecture balances simplicity with capability:
+- **Image processing** happens entirely in-browser (no server costs, great privacy)
+- **Brand search** uses a Cloudflare Pages Function as a proxy (keeps API key server-side)
+- **Static hosting** is free and globally distributed
 
 ---
 
@@ -59,9 +85,21 @@ The beautiful simplicity here: Cloudflare just serves static files. There's no s
 
 **Limitation:** Canvas API (which Pica outputs to) can't export GIF format - only PNG and JPEG. If someone selects GIF output, we export as PNG instead.
 
-### Cloudflare Pages
-**What it is:** Free static site hosting with global CDN.
+### Cloudflare Pages & Pages Functions
+**What it is:** Free static site hosting with global CDN, plus serverless functions.
 **Why we chose it:** Dead simple deployment, fast everywhere, free tier is generous, and you're already familiar with it.
+
+**Pages Functions:** The `/functions/api/brandfetch.js` file automatically becomes an API endpoint at `/api/brandfetch`. This is how Cloudflare Pages handles serverless - any file in the `functions/` directory becomes a route.
+
+### Brandfetch API
+**What it is:** A commercial API that provides access to brand logos, colors, and assets for thousands of companies.
+**Why we chose it:** High-quality logos in multiple formats (SVG, PNG) and variants (icon, logo, symbol), with light/dark themes. Much better than scraping or using inconsistent sources.
+
+**Key endpoints we use:**
+- `GET /v2/search/{query}` - Search for brands by name
+- `GET /v2/brands/{domain}` - Get full brand data including all logo variants
+
+**Security consideration:** The API key is stored as a Cloudflare environment variable and never exposed to the browser. All API calls go through our Pages Function proxy.
 
 ### ServiceNow KB0696767 Compliance
 **What it is:** ServiceNow's official image requirements for Knowledge Base.
@@ -161,6 +199,32 @@ Note: Clipboard API requires HTTPS (or localhost) and user gesture (click handle
 ### Why Not Just CSS `width/height`?
 CSS only changes how an image *displays*, not the actual pixels. If you set a 1000px image to display at 500px, you're still sending 1000px of data. Canvas actually creates a new, smaller image.
 
+### Cloudflare Pages Functions Pattern
+To add serverless API endpoints to a static site, just put JavaScript files in `/functions/`:
+```
+/functions/api/brandfetch.js → GET /api/brandfetch
+/functions/hello.js → GET /hello
+```
+
+The function exports an `onRequest` handler:
+```javascript
+export async function onRequest(context) {
+  const { request, env } = context;
+  // env.MY_SECRET contains environment variables
+  // request.url contains the full URL including query params
+
+  return new Response(JSON.stringify({ data }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+```
+
+**Key benefits:**
+- No separate deployment - functions deploy with the site
+- Access to environment variables via `env`
+- Automatic HTTPS
+- Globally distributed (runs at the edge)
+
 ---
 
 ## Bugs and Lessons Learned
@@ -223,6 +287,30 @@ Before making the repo public, we did a senior security engineer review. Even th
 
 **Lesson:** Even "simple" static sites benefit from a security checklist before going public. The attack surface is small, but defense-in-depth costs nothing and builds good habits.
 
+### Feature: Brand Logo Fetcher
+Added a second column for fetching brand logos from the Brandfetch API. Key implementation decisions:
+
+**Why a server-side proxy?**
+The Brandfetch API requires an API key. We could put it in the client-side code, but then anyone could steal it. Instead, we use a Cloudflare Pages Function as a proxy:
+1. Browser calls `/api/brandfetch?q=microsoft`
+2. Pages Function adds the API key and forwards to Brandfetch
+3. Response flows back through the Function
+4. API key never reaches the browser
+
+**CORS and crossOrigin**
+When loading images from Brandfetch's CDN to draw on Canvas, we need CORS headers. Setting `img.crossOrigin = 'anonymous'` tells the browser to make a CORS request. If Brandfetch's server doesn't send the right headers, Canvas will be "tainted" and we can't export it.
+
+**Logo variants**
+Brands often have multiple logo types:
+- **icon**: Square, suitable for favicons and app icons (think the Twitter bird alone)
+- **logo**: Horizontal lockup with wordmark (Twitter bird + "Twitter" text)
+- **symbol**: The brand mark without text
+
+Each can have light and dark variants. We display all available variants so users can pick the right one for their context.
+
+**Reusing resize logic**
+Rather than duplicating all the resize code, we made the core `resizeForPreset()` function accept the image and dimensions as parameters. Both columns call the same function, ensuring consistent quality and behavior.
+
 ---
 
 ## Best Practices That Emerged
@@ -253,6 +341,13 @@ For simple tools, putting everything in one HTML file:
 - Makes debugging easy (no "which file is this in?")
 - Eliminates build steps
 
+### Proxy Third-Party APIs
+Never put API keys in client-side code. Instead:
+1. Create a simple serverless function (Pages Functions, Vercel, etc.)
+2. Store the API key as an environment variable
+3. Browser calls your endpoint, which forwards to the real API
+4. 10 lines of code, zero exposure risk
+
 ### Security Headers Cost Nothing
 Even for static sites, add a `_headers` file (Cloudflare Pages) or equivalent:
 ```
@@ -281,4 +376,4 @@ These are one-time additions that protect against supply chain attacks and give 
 
 ---
 
-*Last updated: 12 February 2026 - Added security hardening for public release*
+*Last updated: 12 February 2026 - Added two-column layout with Brand Logo Fetcher using Brandfetch API*

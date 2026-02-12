@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ServiceNow Image Resizer is a browser-based tool for resizing images to meet ServiceNow Knowledge Base requirements. It enforces ServiceNow's image guidelines (KB0696767) including:
+ServiceNow Image Tools is a browser-based tool for preparing images for ServiceNow Knowledge Base articles. It has two main features:
+
+### 1. Image Resizer (Left Column)
+Upload and resize your own images to meet ServiceNow KB requirements (KB0696767):
 - Accepted formats: JPG, PNG, GIF only (no WebP, PDF, PSD)
 - Preset bounding boxes: Thumbnail (max 150×150), Medium (max 300×200), Large (max 600×600)
 - Max widths: 840px (Knowledge Portal), 960px (Legacy View)
@@ -14,26 +17,41 @@ ServiceNow Image Resizer is a browser-based tool for resizing images to meet Ser
 - Upscale warning (ServiceNow recommends downsizing only)
 
 **Input methods:** Click to upload, drag & drop, or paste from clipboard (Ctrl/Cmd+V)
-**Output methods:** Download file, copy to clipboard, or batch export multiple sizes
 
-All processing happens client-side via Pica (Lanczos3 resampling).
+### 2. Brand Logo Fetcher (Right Column)
+Search and download high-quality brand logos using the Brandfetch API:
+- Search by brand name or domain
+- Multiple logo variants (icon, logo, symbol) in light/dark themes
+- Same resize presets and options as manual upload
+- Batch export to multiple sizes
+
+**Requires:** `BRANDFETCH_API_KEY` environment variable in Cloudflare Pages
+
+**Output methods (both columns):** Download file, copy to clipboard, or batch export multiple sizes
+
+All image processing happens client-side via Pica (Lanczos3 resampling). API requests are proxied through Cloudflare Pages Functions to keep the API key secure.
 
 ## Tech Stack
 
 - **Frontend**: Vanilla HTML/CSS/JavaScript
 - **Image Processing**: Pica library (Lanczos3 resampling) - ~50KB from CDN
-- **Deployment**: Cloudflare Pages (static site)
-- **Build**: None required - pure static files
+- **API Proxy**: Cloudflare Pages Functions (serverless)
+- **Brand Logos**: Brandfetch API
+- **Deployment**: Cloudflare Pages
+- **Build**: None required - pure static files + Functions
 
 ## Project Structure
 
 ```
 /
-├── index.html      # Main application (single-page app)
-├── _headers        # Cloudflare Pages security headers (CSP, etc.)
-├── CLAUDE.md       # This file
-├── FORKIERAN.md    # Learning documentation
-└── wrangler.toml   # Cloudflare Pages configuration (optional)
+├── index.html           # Main application (single-page app)
+├── _headers             # Cloudflare Pages security headers (CSP, etc.)
+├── functions/
+│   └── api/
+│       └── brandfetch.js  # Cloudflare Pages Function to proxy Brandfetch API
+├── CLAUDE.md            # This file
+├── FORKIERAN.md         # Learning documentation
+└── wrangler.toml        # Cloudflare Pages configuration (optional)
 ```
 
 ## Common Commands
@@ -42,11 +60,17 @@ All processing happens client-side via Pica (Lanczos3 resampling).
 # Local development - just open index.html in browser
 open index.html
 
+# Local development with Functions (for brand search)
+npx wrangler pages dev . --binding BRANDFETCH_API_KEY=your-key-here
+
 # Deploy to Cloudflare Pages
 # Option 1: Connect GitHub repo to Cloudflare Pages dashboard
 # Option 2: Direct upload via Cloudflare dashboard
 # Option 3: CLI deployment
-npx wrangler pages deploy . --project-name=icon-resizer
+npx wrangler pages deploy . --project-name=sn-image-tools
+
+# Set environment variable in Cloudflare Pages dashboard:
+# Settings > Environment variables > Add: BRANDFETCH_API_KEY
 ```
 
 ## Architecture

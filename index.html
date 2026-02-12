@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ServiceNow Image Resizer</title>
+  <title>ServiceNow Image Tools</title>
   <script src="https://unpkg.com/pica@9.0.1/dist/pica.min.js"
           integrity="sha384-erKD4aAW95PJjutWX+eFrsIh9Kl6k9mLJ89rDrWhF2/EvCdxqe2aR5tDaI4SIFl/"
           crossorigin="anonymous"></script>
@@ -129,11 +129,45 @@
     .main-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+      gap: 2rem;
       align-items: start;
     }
 
-    @media (max-width: 900px) {
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .column-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .column-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .column-header .icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+    .column-header .icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: #fff;
+    }
+
+    @media (max-width: 1100px) {
       .main-layout {
         grid-template-columns: 1fr;
       }
@@ -615,6 +649,181 @@
       display: none !important;
     }
 
+    /* Brand Search Styles */
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .search-box input {
+      flex: 1;
+    }
+    .search-box button {
+      padding: 0.6rem 1rem;
+    }
+
+    .brand-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 0.5rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .brand-results:empty::after {
+      content: 'Search for a brand to see logos';
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    .brand-results.loading::after {
+      content: 'Searching...';
+    }
+    .brand-results.no-results::after {
+      content: 'No brands found. Try a different search term.';
+    }
+
+    .brand-card {
+      background: var(--bg-raised);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-card:hover {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .brand-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .brand-card img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    .brand-card span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .logo-variants {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .logo-variant {
+      flex: 1;
+      min-width: 80px;
+      max-width: 150px;
+      background: var(--bg-raised);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .logo-variant:hover {
+      border-color: var(--accent);
+    }
+    .logo-variant.selected {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .logo-variant img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+    .logo-variant span {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .logo-variant.dark-bg {
+      background: #1a1a1a;
+    }
+    .logo-variant.dark-bg span {
+      color: #888;
+    }
+
+    .variant-section {
+      margin-top: 0.75rem;
+    }
+    .variant-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .brand-info img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+    .brand-info-text h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .brand-info-text span {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .api-notice {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 0.5rem;
+    }
+    .api-notice a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .api-notice a:hover {
+      text-decoration: underline;
+    }
+
     /* Animation */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(8px); }
@@ -632,7 +841,7 @@
     <div class="nav-inner">
       <a href="/" class="nav-brand">
         <span class="nav-brand-icon">I</span>
-        <span class="nav-brand-text">ServiceNow Image Resizer</span>
+        <span class="nav-brand-text">ServiceNow Image Tools</span>
         <span class="nav-subtitle">Lanczos3 quality &middot; KB0696767 compliant</span>
       </a>
     </div>
@@ -640,15 +849,25 @@
 
   <main class="container">
     <div class="page-header animate-in">
-      <h1>Resize Images for Knowledge Base</h1>
-      <p>Prepare images for ServiceNow KB articles with professional-grade Lanczos3 resampling. Everything happens in your browser.</p>
+      <h1>Images for Knowledge Base</h1>
+      <p>Prepare images for ServiceNow KB articles with professional-grade Lanczos3 resampling. Upload your own or fetch brand logos.</p>
     </div>
 
     <div class="main-layout">
-      <div class="left-panel animate-in delay-1">
-        <div class="card">
-          <div class="card-header">Upload Image</div>
+      <!-- LEFT COLUMN: Manual Upload -->
+      <div class="column animate-in delay-1">
+        <div class="column-header">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h2>Upload Image</h2>
+        </div>
 
+        <div class="card">
           <div class="dropzone" id="dropZone">
             <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.gif,image/png,image/jpeg,image/gif">
             <div class="dropzone-icon">
@@ -742,9 +961,7 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="right-panel animate-in delay-2">
         <div class="preview-section" id="previewSection">
           <div class="card" style="padding: 1rem;">
             <div class="preview-header">
@@ -804,10 +1021,238 @@
           </div>
         </div>
       </div>
+
+      <!-- RIGHT COLUMN: Brand Logos -->
+      <div class="column animate-in delay-2">
+        <div class="column-header">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <h2>Brand Logos</h2>
+        </div>
+
+        <div class="card">
+          <div class="card-header">Search Brands</div>
+          <div class="search-box">
+            <input type="text" id="brandSearch" placeholder="Search brand name or domain...">
+            <button class="btn btn-primary" id="searchBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </button>
+          </div>
+          <div class="brand-results" id="brandResults"></div>
+          <p class="api-notice">Logos powered by <a href="https://brandfetch.com" target="_blank" rel="noopener">Brandfetch</a></p>
+        </div>
+
+        <div class="card hidden" id="brandLogoCard">
+          <div class="brand-info" id="brandInfo">
+            <img id="brandIcon" src="" alt="">
+            <div class="brand-info-text">
+              <h4 id="brandName"></h4>
+              <span id="brandDomain"></span>
+            </div>
+          </div>
+
+          <div class="variant-section" id="logoVariantsSection">
+            <div class="variant-label">Select a logo variant</div>
+            <div class="logo-variants" id="logoVariants"></div>
+          </div>
+
+          <div class="info-badge visible" id="brandOriginalInfo" style="margin-top: 1rem;">
+            Original: <strong id="brandOriginalDimensions"></strong>
+          </div>
+
+          <div class="controls visible" id="brandControls" style="margin-top: 1rem;">
+            <div class="control-row">
+              <label>Preset</label>
+              <select id="brandPresetSelect">
+                <option value="thumbnail">Thumbnail (max 150 &times; 150)</option>
+                <option value="medium">Medium (max 300 &times; 200)</option>
+                <option value="large">Large (max 600 &times; 600)</option>
+                <option value="portal-max">Knowledge Portal (max 840px wide)</option>
+                <option value="legacy-max">Legacy View (max 960px wide)</option>
+                <option value="custom">Custom dimensions</option>
+              </select>
+            </div>
+
+            <div class="control-row" id="brandPadRow">
+              <label></label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="brandPadToFit">
+                <label for="brandPadToFit">Pad to exact size</label>
+              </div>
+            </div>
+
+            <div class="control-row hidden" id="brandBgColorRow">
+              <label>Background</label>
+              <div class="bg-options">
+                <button type="button" class="bg-option active" id="brandBgAuto" data-bg="auto">Auto-detect</button>
+                <button type="button" class="bg-option" id="brandBgWhite" data-bg="#ffffff">White</button>
+                <button type="button" class="bg-option" id="brandBgBlack" data-bg="#000000">Black</button>
+                <input type="color" id="brandBgCustom" value="#ffffff" title="Custom color">
+              </div>
+            </div>
+
+            <div class="output-badge" id="brandOutputInfo">
+              Output: <strong id="brandOutputDimensions"></strong>
+            </div>
+
+            <div class="control-row hidden" id="brandCustomDimensions">
+              <label>Size</label>
+              <div class="dimensions">
+                <input type="number" id="brandWidthInput" placeholder="Width" min="1">
+                <span>&times;</span>
+                <input type="number" id="brandHeightInput" placeholder="Height" min="1">
+              </div>
+            </div>
+
+            <div class="control-row hidden" id="brandAspectRow">
+              <label></label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="brandLockAspect" checked>
+                <label for="brandLockAspect">Lock aspect ratio</label>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <label>Format</label>
+              <select id="brandFormatSelect">
+                <option value="png">PNG (best for logos)</option>
+                <option value="jpeg">JPG (smaller file size)</option>
+              </select>
+            </div>
+
+            <div class="control-row">
+              <label>Filename</label>
+              <input type="text" id="brandFilenameInput" placeholder="brand-logo">
+            </div>
+            <p class="help-text">Letters, numbers, hyphens, and underscores only</p>
+
+            <div class="warning" id="brandUpscaleWarning">
+              Upscaling not recommended. ServiceNow advises resizing images <strong>before</strong> uploading, not enlarging them after.
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-section hidden" id="brandPreviewSection">
+          <div class="card" style="padding: 1rem;">
+            <div class="preview-header">
+              <span>Preview</span>
+              <span class="preview-info" id="brandPreviewInfo"></span>
+            </div>
+            <div class="preview-container" style="margin-top: 0.75rem;">
+              <img id="brandPreview" alt="Brand Logo Preview">
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-secondary" id="brandResetBtn">Reset</button>
+            <button class="btn btn-primary" id="brandCopyBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+            <button class="btn btn-primary" id="brandDownloadBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+          </div>
+
+          <div class="batch-export">
+            <div class="batch-header" id="brandBatchHeader">
+              <span>Batch Export</span>
+              <button type="button" class="batch-toggle" id="brandBatchToggle">&#9660;</button>
+            </div>
+            <div class="batch-content hidden" id="brandBatchContent">
+              <div class="batch-options">
+                <label class="batch-option">
+                  <input type="checkbox" value="thumbnail" checked> Thumbnail (150&times;150)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="medium" checked> Medium (300&times;200)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="large" checked> Large (600&times;600)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="portal-max"> Portal Max (840px)
+                </label>
+                <label class="batch-option">
+                  <input type="checkbox" value="legacy-max"> Legacy Max (960px)
+                </label>
+              </div>
+              <div class="batch-settings">
+                <label class="batch-option">
+                  <input type="checkbox" id="brandBatchPad"> Pad to exact size
+                </label>
+              </div>
+              <button class="btn btn-primary" id="brandExportAllBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
   <script>
+    // Initialize Pica with high quality settings (shared)
+    const picaInstance = pica({
+      features: ['js', 'wasm', 'ww'],
+    });
+
+    const presets = {
+      'thumbnail': { maxWidth: 150, maxHeight: 150 },
+      'medium': { maxWidth: 300, maxHeight: 200 },
+      'large': { maxWidth: 600, maxHeight: 600 },
+      'portal-max': { maxWidth: 840, maxHeight: null },
+      'legacy-max': { maxWidth: 960, maxHeight: null }
+    };
+
+    function sanitizeFilename(name) {
+      return name
+        .replace(/[^a-zA-Z0-9\-_]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase() || 'image';
+    }
+
+    function detectEdgeColor(canvas) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const samples = [];
+      const sampleCount = 10;
+
+      for (let i = 0; i < sampleCount; i++) {
+        const x = Math.floor((w / sampleCount) * i);
+        samples.push(ctx.getImageData(x, 0, 1, 1).data);
+        samples.push(ctx.getImageData(x, h - 1, 1, 1).data);
+      }
+      for (let i = 0; i < sampleCount; i++) {
+        const y = Math.floor((h / sampleCount) * i);
+        samples.push(ctx.getImageData(0, y, 1, 1).data);
+        samples.push(ctx.getImageData(w - 1, y, 1, 1).data);
+      }
+
+      let r = 0, g = 0, b = 0;
+      for (const pixel of samples) {
+        r += pixel[0];
+        g += pixel[1];
+        b += pixel[2];
+      }
+      r = Math.round(r / samples.length);
+      g = Math.round(g / samples.length);
+      b = Math.round(b / samples.length);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    // ============================================
+    // LEFT PANEL: Manual Upload
+    // ============================================
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const controls = document.getElementById('controls');
@@ -829,12 +1274,9 @@
     const padRow = document.getElementById('padRow');
     const bgColorRow = document.getElementById('bgColorRow');
     const bgAuto = document.getElementById('bgAuto');
-    const bgWhite = document.getElementById('bgWhite');
-    const bgBlack = document.getElementById('bgBlack');
     const bgCustom = document.getElementById('bgCustom');
     const originalInfo = document.getElementById('originalInfo');
     const originalDimensions = document.getElementById('originalDimensions');
-    const outputInfo = document.getElementById('outputInfo');
     const outputDimensions = document.getElementById('outputDimensions');
     const formatNote = document.getElementById('formatNote');
     const upscaleWarning = document.getElementById('upscaleWarning');
@@ -845,88 +1287,6 @@
     let originalFormat = 'png';
     let currentCanvas = null;
     let bgMode = 'auto';
-
-    // Initialize Pica with high quality settings
-    const picaInstance = pica({
-      features: ['js', 'wasm', 'ww'],
-    });
-
-    const presets = {
-      'thumbnail': { maxWidth: 150, maxHeight: 150 },
-      'medium': { maxWidth: 300, maxHeight: 200 },
-      'large': { maxWidth: 600, maxHeight: 600 },
-      'portal-max': { maxWidth: 840, maxHeight: null },
-      'legacy-max': { maxWidth: 960, maxHeight: null }
-    };
-
-    function sanitizeFilename(name) {
-      return name
-        .replace(/[^a-zA-Z0-9\-_]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
-        .toLowerCase() || 'image';
-    }
-
-    // Drag and drop handlers
-    dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      const file = e.dataTransfer.files[0];
-      if (!file) return;
-      if (!isValidFormat(file)) {
-        alert('Please use JPG, PNG, or GIF format only. Other formats like WebP, PDF, PSD are not supported by ServiceNow.');
-      } else if (!isValidSize(file)) {
-        // Alert already shown
-      } else {
-        loadImage(file);
-      }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (!isValidFormat(file)) {
-        alert('Please use JPG, PNG, or GIF format only.');
-        fileInput.value = '';
-      } else if (!isValidSize(file)) {
-        fileInput.value = '';
-      } else {
-        loadImage(file);
-      }
-    });
-
-    // Paste from clipboard
-    document.addEventListener('paste', (e) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-
-      for (const item of items) {
-        if (item.type.startsWith('image/')) {
-          e.preventDefault();
-          const file = item.getAsFile();
-          if (!file) break;
-          if (!isValidFormat(file)) {
-            alert('Please use JPG, PNG, or GIF format only.');
-          } else if (!isValidSize(file)) {
-            // Alert already shown
-          } else {
-            loadImage(file);
-          }
-          break;
-        }
-      }
-    });
 
     const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
@@ -942,6 +1302,57 @@
       }
       return true;
     }
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      if (!isValidFormat(file)) {
+        alert('Please use JPG, PNG, or GIF format only.');
+      } else if (isValidSize(file)) {
+        loadImage(file);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!isValidFormat(file)) {
+        alert('Please use JPG, PNG, or GIF format only.');
+        fileInput.value = '';
+      } else if (isValidSize(file)) {
+        loadImage(file);
+      } else {
+        fileInput.value = '';
+      }
+    });
+
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (!file) break;
+          if (!isValidFormat(file)) {
+            alert('Please use JPG, PNG, or GIF format only.');
+          } else if (isValidSize(file)) {
+            loadImage(file);
+          }
+          break;
+        }
+      }
+    });
 
     function loadImage(file) {
       const rawName = file.name ? file.name.replace(/\.[^/.]+$/, '') : '';
@@ -961,23 +1372,17 @@
 
           originalDimensions.textContent = `${originalWidth} × ${originalHeight}px`;
           originalInfo.classList.add('visible');
-
-          selectBestPreset();
-
           controls.classList.add('visible');
           previewSection.classList.add('visible');
 
+          selectBestPreset();
           updateFormatNote();
           updatePreview();
         };
-        img.onerror = () => {
-          alert('Failed to load image. The file may be corrupted.');
-        };
+        img.onerror = () => alert('Failed to load image.');
         img.src = e.target.result;
       };
-      reader.onerror = () => {
-        alert('Failed to read file. Please try again.');
-      };
+      reader.onerror = () => alert('Failed to read file.');
       reader.readAsDataURL(file);
     }
 
@@ -990,8 +1395,6 @@
         presetSelect.value = 'large';
       } else if (originalWidth <= 840) {
         presetSelect.value = 'portal-max';
-      } else if (originalWidth <= 960) {
-        presetSelect.value = 'legacy-max';
       } else {
         presetSelect.value = 'portal-max';
       }
@@ -1005,14 +1408,14 @@
 
       customDimensions.classList.toggle('hidden', !isCustom);
       aspectRow.classList.toggle('hidden', !isCustom);
-
       padRow.classList.toggle('hidden', !hasFixedSize && !isCustom);
+
       if (!hasFixedSize && !isCustom) {
         padToFit.checked = false;
         bgColorRow.classList.add('hidden');
       }
 
-      if (preset) {
+      if (preset && originalWidth && originalHeight) {
         const aspectRatio = originalWidth / originalHeight;
         let newWidth, newHeight;
 
@@ -1022,7 +1425,6 @@
         } else {
           const maxWidth = Math.min(preset.maxWidth, originalWidth);
           const maxHeight = Math.min(preset.maxHeight, originalHeight);
-
           if (aspectRatio > maxWidth / maxHeight) {
             newWidth = maxWidth;
             newHeight = Math.round(maxWidth / aspectRatio);
@@ -1078,9 +1480,9 @@
       updatePreview();
     });
 
-    document.querySelectorAll('.bg-option').forEach(btn => {
+    document.querySelectorAll('#bgColorRow .bg-option').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.bg-option').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#bgColorRow .bg-option').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         bgMode = btn.dataset.bg;
         updatePreview();
@@ -1088,7 +1490,7 @@
     });
 
     bgCustom.addEventListener('input', () => {
-      document.querySelectorAll('.bg-option').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#bgColorRow .bg-option').forEach(b => b.classList.remove('active'));
       bgMode = bgCustom.value;
       updatePreview();
     });
@@ -1112,9 +1514,11 @@
     let resizeTimeout = null;
     let isResizing = false;
     let pendingResize = false;
-    const previewContainer = document.querySelector('.preview-container');
+    const previewContainer = document.querySelector('#previewSection .preview-container');
 
     function updatePreview() {
+      if (!originalImage) return;
+
       let width = parseInt(widthInput.value) || originalWidth;
       let height = parseInt(heightInput.value) || originalHeight;
 
@@ -1130,46 +1534,11 @@
       outputDimensions.textContent = `${width} × ${height}px`;
 
       clearTimeout(resizeTimeout);
-
       if (isResizing) {
         pendingResize = true;
         return;
       }
-
       resizeTimeout = setTimeout(() => doResize(), 150);
-    }
-
-    function detectEdgeColor(canvas) {
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width;
-      const h = canvas.height;
-
-      const samples = [];
-      const sampleCount = 10;
-
-      for (let i = 0; i < sampleCount; i++) {
-        const x = Math.floor((w / sampleCount) * i);
-        samples.push(ctx.getImageData(x, 0, 1, 1).data);
-        samples.push(ctx.getImageData(x, h - 1, 1, 1).data);
-      }
-
-      for (let i = 0; i < sampleCount; i++) {
-        const y = Math.floor((h / sampleCount) * i);
-        samples.push(ctx.getImageData(0, y, 1, 1).data);
-        samples.push(ctx.getImageData(w - 1, y, 1, 1).data);
-      }
-
-      let r = 0, g = 0, b = 0;
-      for (const pixel of samples) {
-        r += pixel[0];
-        g += pixel[1];
-        b += pixel[2];
-      }
-      r = Math.round(r / samples.length);
-      g = Math.round(g / samples.length);
-      b = Math.round(b / samples.length);
-
-      return `rgb(${r}, ${g}, ${b})`;
     }
 
     async function doResize() {
@@ -1181,7 +1550,6 @@
 
       isResizing = true;
       pendingResize = false;
-
       previewContainer.classList.add('loading');
 
       const fitWidth = parseInt(widthInput.value) || originalWidth;
@@ -1193,8 +1561,7 @@
       const sourceCanvas = document.createElement('canvas');
       sourceCanvas.width = originalWidth;
       sourceCanvas.height = originalHeight;
-      const sourceCtx = sourceCanvas.getContext('2d');
-      sourceCtx.drawImage(originalImage, 0, 0);
+      sourceCanvas.getContext('2d').drawImage(originalImage, 0, 0);
 
       const resizedCanvas = document.createElement('canvas');
       resizedCanvas.width = fitWidth;
@@ -1209,23 +1576,15 @@
         });
 
         let finalCanvas;
-
         if (shouldPad && preset && preset.maxHeight !== null) {
           const padWidth = preset.maxWidth;
           const padHeight = preset.maxHeight;
-
           finalCanvas = document.createElement('canvas');
           finalCanvas.width = padWidth;
           finalCanvas.height = padHeight;
           const finalCtx = finalCanvas.getContext('2d');
 
-          let bgColor;
-          if (bgMode === 'auto') {
-            bgColor = detectEdgeColor(resizedCanvas);
-          } else {
-            bgColor = bgMode;
-          }
-
+          const bgColor = bgMode === 'auto' ? detectEdgeColor(resizedCanvas) : bgMode;
           finalCtx.fillStyle = bgColor;
           finalCtx.fillRect(0, 0, padWidth, padHeight);
 
@@ -1237,16 +1596,8 @@
         }
 
         currentCanvas = finalCanvas;
-
-        let mimeType, quality;
-        if (format === 'jpeg') {
-          mimeType = 'image/jpeg';
-          quality = 0.92;
-        } else {
-          mimeType = 'image/png';
-          quality = undefined;
-        }
-
+        const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+        const quality = format === 'jpeg' ? 0.92 : undefined;
         preview.src = finalCanvas.toDataURL(mimeType, quality);
       } catch (err) {
         console.error('Pica resize failed:', err);
@@ -1254,7 +1605,6 @@
 
       previewContainer.classList.remove('loading');
       isResizing = false;
-
       if (pendingResize) {
         pendingResize = false;
         doResize();
@@ -1263,19 +1613,10 @@
 
     downloadBtn.addEventListener('click', () => {
       if (!currentCanvas) return;
-
       const format = formatSelect.value === 'original' ? originalFormat : formatSelect.value;
-      let extension, mimeType, quality;
-
-      if (format === 'jpeg') {
-        extension = 'jpg';
-        mimeType = 'image/jpeg';
-        quality = 0.92;
-      } else {
-        extension = 'png';
-        mimeType = 'image/png';
-      }
-
+      const extension = format === 'jpeg' ? 'jpg' : 'png';
+      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      const quality = format === 'jpeg' ? 0.92 : undefined;
       const filename = filenameInput.value || 'image';
 
       const link = document.createElement('a');
@@ -1286,20 +1627,13 @@
 
     copyBtn.addEventListener('click', async () => {
       if (!currentCanvas) return;
-
       try {
-        const blob = await new Promise(resolve => {
-          currentCanvas.toBlob(resolve, 'image/png');
-        });
-
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
+        const blob = await new Promise(resolve => currentCanvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
 
         const originalHTML = copyBtn.innerHTML;
         copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
         copyBtn.classList.add('btn-success');
-
         setTimeout(() => {
           copyBtn.innerHTML = originalHTML;
           copyBtn.classList.remove('btn-success');
@@ -1328,11 +1662,11 @@
       padToFit.checked = false;
       bgColorRow.classList.add('hidden');
       bgMode = 'auto';
-      document.querySelectorAll('.bg-option').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#bgColorRow .bg-option').forEach(b => b.classList.remove('active'));
       bgAuto.classList.add('active');
     });
 
-    // Batch export functionality
+    // Batch export
     const batchToggle = document.getElementById('batchToggle');
     const batchContent = document.getElementById('batchContent');
     const batchHeader = document.getElementById('batchHeader');
@@ -1344,20 +1678,19 @@
       batchToggle.classList.toggle('open');
     });
 
-    async function resizeForPreset(presetName, shouldPad, bgColor) {
+    async function resizeForPreset(img, imgWidth, imgHeight, presetName, shouldPad, bgColor) {
       const preset = presets[presetName];
       if (!preset) return null;
 
-      const aspectRatio = originalWidth / originalHeight;
+      const aspectRatio = imgWidth / imgHeight;
       let fitWidth, fitHeight;
 
       if (preset.maxHeight === null) {
-        fitWidth = Math.min(preset.maxWidth, originalWidth);
+        fitWidth = Math.min(preset.maxWidth, imgWidth);
         fitHeight = Math.round(fitWidth / aspectRatio);
       } else {
-        const maxWidth = Math.min(preset.maxWidth, originalWidth);
-        const maxHeight = Math.min(preset.maxHeight, originalHeight);
-
+        const maxWidth = Math.min(preset.maxWidth, imgWidth);
+        const maxHeight = Math.min(preset.maxHeight, imgHeight);
         if (aspectRatio > maxWidth / maxHeight) {
           fitWidth = maxWidth;
           fitHeight = Math.round(maxWidth / aspectRatio);
@@ -1368,9 +1701,9 @@
       }
 
       const sourceCanvas = document.createElement('canvas');
-      sourceCanvas.width = originalWidth;
-      sourceCanvas.height = originalHeight;
-      sourceCanvas.getContext('2d').drawImage(originalImage, 0, 0);
+      sourceCanvas.width = imgWidth;
+      sourceCanvas.height = imgHeight;
+      sourceCanvas.getContext('2d').drawImage(img, 0, 0);
 
       const resizedCanvas = document.createElement('canvas');
       resizedCanvas.width = fitWidth;
@@ -1386,23 +1719,18 @@
       if (shouldPad && preset.maxHeight !== null) {
         const padWidth = preset.maxWidth;
         const padHeight = preset.maxHeight;
-
         const finalCanvas = document.createElement('canvas');
         finalCanvas.width = padWidth;
         finalCanvas.height = padHeight;
         const ctx = finalCanvas.getContext('2d');
 
-        let bg = bgColor;
-        if (bg === 'auto') {
-          bg = detectEdgeColor(resizedCanvas);
-        }
+        const bg = bgColor === 'auto' ? detectEdgeColor(resizedCanvas) : bgColor;
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, padWidth, padHeight);
 
         const offsetX = Math.round((padWidth - fitWidth) / 2);
         const offsetY = Math.round((padHeight - fitHeight) / 2);
         ctx.drawImage(resizedCanvas, offsetX, offsetY);
-
         return finalCanvas;
       }
 
@@ -1412,10 +1740,7 @@
     exportAllBtn.addEventListener('click', async () => {
       if (!originalImage) return;
 
-      const selectedPresets = Array.from(
-        batchContent.querySelectorAll('.batch-options input:checked')
-      ).map(cb => cb.value);
-
+      const selectedPresets = Array.from(batchContent.querySelectorAll('.batch-options input:checked')).map(cb => cb.value);
       if (selectedPresets.length === 0) {
         alert('Please select at least one size to export.');
         return;
@@ -1430,29 +1755,506 @@
 
       exportAllBtn.disabled = true;
       const originalHTML = exportAllBtn.innerHTML;
-      exportAllBtn.innerHTML = 'Exporting...';
 
       for (let i = 0; i < selectedPresets.length; i++) {
-        const presetName = selectedPresets[i];
         exportAllBtn.innerHTML = `Exporting ${i + 1}/${selectedPresets.length}...`;
-
         try {
-          const canvas = await resizeForPreset(presetName, shouldPad, bgMode);
+          const canvas = await resizeForPreset(originalImage, originalWidth, originalHeight, selectedPresets[i], shouldPad, bgMode);
           if (canvas) {
             const link = document.createElement('a');
-            link.download = `${filename}-${presetName}.${extension}`;
+            link.download = `${filename}-${selectedPresets[i]}.${extension}`;
             link.href = canvas.toDataURL(mimeType, quality);
             link.click();
-
             await new Promise(resolve => setTimeout(resolve, 300));
           }
         } catch (err) {
-          console.error(`Failed to export ${presetName}:`, err);
+          console.error(`Failed to export ${selectedPresets[i]}:`, err);
         }
       }
 
       exportAllBtn.disabled = false;
       exportAllBtn.innerHTML = originalHTML;
+    });
+
+    // ============================================
+    // RIGHT PANEL: Brand Logos
+    // ============================================
+    const brandSearch = document.getElementById('brandSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const brandResults = document.getElementById('brandResults');
+    const brandLogoCard = document.getElementById('brandLogoCard');
+    const brandInfo = document.getElementById('brandInfo');
+    const brandIcon = document.getElementById('brandIcon');
+    const brandName = document.getElementById('brandName');
+    const brandDomain = document.getElementById('brandDomain');
+    const logoVariants = document.getElementById('logoVariants');
+    const brandPresetSelect = document.getElementById('brandPresetSelect');
+    const brandPadToFit = document.getElementById('brandPadToFit');
+    const brandPadRow = document.getElementById('brandPadRow');
+    const brandBgColorRow = document.getElementById('brandBgColorRow');
+    const brandBgAuto = document.getElementById('brandBgAuto');
+    const brandBgCustom = document.getElementById('brandBgCustom');
+    const brandCustomDimensions = document.getElementById('brandCustomDimensions');
+    const brandAspectRow = document.getElementById('brandAspectRow');
+    const brandWidthInput = document.getElementById('brandWidthInput');
+    const brandHeightInput = document.getElementById('brandHeightInput');
+    const brandLockAspect = document.getElementById('brandLockAspect');
+    const brandFormatSelect = document.getElementById('brandFormatSelect');
+    const brandFilenameInput = document.getElementById('brandFilenameInput');
+    const brandOriginalDimensions = document.getElementById('brandOriginalDimensions');
+    const brandOutputDimensions = document.getElementById('brandOutputDimensions');
+    const brandUpscaleWarning = document.getElementById('brandUpscaleWarning');
+    const brandPreviewSection = document.getElementById('brandPreviewSection');
+    const brandPreview = document.getElementById('brandPreview');
+    const brandPreviewInfo = document.getElementById('brandPreviewInfo');
+    const brandDownloadBtn = document.getElementById('brandDownloadBtn');
+    const brandCopyBtn = document.getElementById('brandCopyBtn');
+    const brandResetBtn = document.getElementById('brandResetBtn');
+
+    let brandImage = null;
+    let brandOriginalWidth = 0;
+    let brandOriginalHeight = 0;
+    let brandCurrentCanvas = null;
+    let brandBgMode = 'auto';
+    let currentBrandData = null;
+
+    async function searchBrands(query) {
+      brandResults.innerHTML = '';
+      brandResults.classList.add('loading');
+
+      try {
+        const response = await fetch(`/api/brandfetch?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Search failed');
+        const results = await response.json();
+
+        brandResults.classList.remove('loading');
+
+        if (!results || results.length === 0) {
+          brandResults.classList.add('no-results');
+          return;
+        }
+
+        brandResults.classList.remove('no-results');
+
+        results.slice(0, 12).forEach(brand => {
+          const card = document.createElement('div');
+          card.className = 'brand-card';
+          card.innerHTML = `
+            <img src="${brand.icon || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${brand.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect fill=%22%23ddd%22 width=%2240%22 height=%2240%22/><text x=%2220%22 y=%2226%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2216%22>${brand.name?.[0] || '?'}</text></svg>'">
+            <span>${brand.name}</span>
+          `;
+          card.addEventListener('click', () => selectBrand(brand));
+          brandResults.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Search error:', err);
+        brandResults.classList.remove('loading');
+        brandResults.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--error);">Search failed. Please try again.</div>';
+      }
+    }
+
+    async function selectBrand(brand) {
+      document.querySelectorAll('.brand-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      try {
+        const response = await fetch(`/api/brandfetch?domain=${encodeURIComponent(brand.domain)}`);
+        if (!response.ok) throw new Error('Failed to fetch brand details');
+        const data = await response.json();
+
+        currentBrandData = data;
+        brandLogoCard.classList.remove('hidden');
+
+        brandIcon.src = brand.icon || '';
+        brandName.textContent = data.name || brand.name;
+        brandDomain.textContent = data.domain || brand.domain;
+        brandFilenameInput.value = sanitizeFilename(data.name || brand.name);
+
+        displayLogoVariants(data.logos || []);
+      } catch (err) {
+        console.error('Brand fetch error:', err);
+        alert('Failed to load brand details.');
+      }
+    }
+
+    function displayLogoVariants(logos) {
+      logoVariants.innerHTML = '';
+
+      if (!logos || logos.length === 0) {
+        logoVariants.innerHTML = '<div style="width:100%;text-align:center;color:var(--text-dim);font-size:0.85rem;">No logo variants available</div>';
+        return;
+      }
+
+      logos.forEach(logo => {
+        if (!logo.formats) return;
+
+        logo.formats.forEach(format => {
+          if (!format.src) return;
+
+          const variant = document.createElement('div');
+          variant.className = 'logo-variant' + (logo.theme === 'dark' ? ' dark-bg' : '');
+          variant.innerHTML = `
+            <img src="${format.src}" alt="${logo.type}">
+            <span>${logo.type}${logo.theme ? ' · ' + logo.theme : ''}</span>
+          `;
+          variant.addEventListener('click', () => selectLogoVariant(format.src, logo.type, logo.theme));
+          logoVariants.appendChild(variant);
+        });
+      });
+    }
+
+    async function selectLogoVariant(src, type, theme) {
+      document.querySelectorAll('.logo-variant').forEach(v => v.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        brandImage = img;
+        brandOriginalWidth = img.width;
+        brandOriginalHeight = img.height;
+
+        brandOriginalDimensions.textContent = `${brandOriginalWidth} × ${brandOriginalHeight}px`;
+        brandPreviewSection.classList.remove('hidden');
+
+        brandSelectBestPreset();
+        brandUpdatePreview();
+      };
+      img.onerror = () => {
+        alert('Failed to load logo image. The image may be blocked by CORS.');
+      };
+      img.src = src;
+    }
+
+    function brandSelectBestPreset() {
+      if (brandOriginalWidth <= 150 && brandOriginalHeight <= 150) {
+        brandPresetSelect.value = 'thumbnail';
+      } else if (brandOriginalWidth <= 300 && brandOriginalHeight <= 200) {
+        brandPresetSelect.value = 'medium';
+      } else if (brandOriginalWidth <= 600 && brandOriginalHeight <= 600) {
+        brandPresetSelect.value = 'large';
+      } else {
+        brandPresetSelect.value = 'large';
+      }
+      brandApplyPreset();
+    }
+
+    function brandApplyPreset() {
+      const preset = presets[brandPresetSelect.value];
+      const isCustom = brandPresetSelect.value === 'custom';
+      const hasFixedSize = preset && preset.maxHeight !== null;
+
+      brandCustomDimensions.classList.toggle('hidden', !isCustom);
+      brandAspectRow.classList.toggle('hidden', !isCustom);
+      brandPadRow.classList.toggle('hidden', !hasFixedSize && !isCustom);
+
+      if (!hasFixedSize && !isCustom) {
+        brandPadToFit.checked = false;
+        brandBgColorRow.classList.add('hidden');
+      }
+
+      if (preset && brandOriginalWidth && brandOriginalHeight) {
+        const aspectRatio = brandOriginalWidth / brandOriginalHeight;
+        let newWidth, newHeight;
+
+        if (preset.maxHeight === null) {
+          newWidth = Math.min(preset.maxWidth, brandOriginalWidth);
+          newHeight = Math.round(newWidth / aspectRatio);
+        } else {
+          const maxWidth = Math.min(preset.maxWidth, brandOriginalWidth);
+          const maxHeight = Math.min(preset.maxHeight, brandOriginalHeight);
+          if (aspectRatio > maxWidth / maxHeight) {
+            newWidth = maxWidth;
+            newHeight = Math.round(maxWidth / aspectRatio);
+          } else {
+            newHeight = maxHeight;
+            newWidth = Math.round(maxHeight * aspectRatio);
+          }
+        }
+
+        brandWidthInput.value = newWidth;
+        brandHeightInput.value = newHeight;
+        brandLockAspect.checked = true;
+      }
+
+      brandCheckUpscale();
+      brandUpdatePreview();
+    }
+
+    brandPresetSelect.addEventListener('change', brandApplyPreset);
+
+    brandWidthInput.addEventListener('input', () => {
+      if (brandLockAspect.checked && brandOriginalWidth) {
+        const ratio = brandOriginalHeight / brandOriginalWidth;
+        brandHeightInput.value = Math.round(brandWidthInput.value * ratio);
+      }
+      brandCheckUpscale();
+      brandUpdatePreview();
+    });
+
+    brandHeightInput.addEventListener('input', () => {
+      if (brandLockAspect.checked && brandOriginalHeight) {
+        const ratio = brandOriginalWidth / brandOriginalHeight;
+        brandWidthInput.value = Math.round(brandHeightInput.value * ratio);
+      }
+      brandCheckUpscale();
+      brandUpdatePreview();
+    });
+
+    brandFilenameInput.addEventListener('input', () => {
+      const sanitized = sanitizeFilename(brandFilenameInput.value);
+      if (sanitized !== brandFilenameInput.value) {
+        brandFilenameInput.value = sanitized;
+      }
+    });
+
+    brandFormatSelect.addEventListener('change', brandUpdatePreview);
+
+    brandPadToFit.addEventListener('change', () => {
+      brandBgColorRow.classList.toggle('hidden', !brandPadToFit.checked);
+      brandUpdatePreview();
+    });
+
+    document.querySelectorAll('#brandBgColorRow .bg-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#brandBgColorRow .bg-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        brandBgMode = btn.dataset.bg;
+        brandUpdatePreview();
+      });
+    });
+
+    brandBgCustom.addEventListener('input', () => {
+      document.querySelectorAll('#brandBgColorRow .bg-option').forEach(b => b.classList.remove('active'));
+      brandBgMode = brandBgCustom.value;
+      brandUpdatePreview();
+    });
+
+    function brandCheckUpscale() {
+      const width = parseInt(brandWidthInput.value) || 0;
+      const height = parseInt(brandHeightInput.value) || 0;
+      const isUpscaling = width > brandOriginalWidth || height > brandOriginalHeight;
+      brandUpscaleWarning.classList.toggle('visible', isUpscaling);
+    }
+
+    let brandResizeTimeout = null;
+    let brandIsResizing = false;
+    let brandPendingResize = false;
+    const brandPreviewContainer = document.querySelector('#brandPreviewSection .preview-container');
+
+    function brandUpdatePreview() {
+      if (!brandImage) return;
+
+      let width = parseInt(brandWidthInput.value) || brandOriginalWidth;
+      let height = parseInt(brandHeightInput.value) || brandOriginalHeight;
+
+      if (brandPadToFit.checked) {
+        const preset = presets[brandPresetSelect.value];
+        if (preset && preset.maxHeight !== null) {
+          width = preset.maxWidth;
+          height = preset.maxHeight;
+        }
+      }
+
+      brandPreviewInfo.textContent = `${width} × ${height}px`;
+      brandOutputDimensions.textContent = `${width} × ${height}px`;
+
+      clearTimeout(brandResizeTimeout);
+      if (brandIsResizing) {
+        brandPendingResize = true;
+        return;
+      }
+      brandResizeTimeout = setTimeout(() => brandDoResize(), 150);
+    }
+
+    async function brandDoResize() {
+      if (!brandImage) return;
+      if (brandIsResizing) {
+        brandPendingResize = true;
+        return;
+      }
+
+      brandIsResizing = true;
+      brandPendingResize = false;
+      brandPreviewContainer.classList.add('loading');
+
+      const fitWidth = parseInt(brandWidthInput.value) || brandOriginalWidth;
+      const fitHeight = parseInt(brandHeightInput.value) || brandOriginalHeight;
+      const format = brandFormatSelect.value;
+      const shouldPad = brandPadToFit.checked;
+      const preset = presets[brandPresetSelect.value];
+
+      const sourceCanvas = document.createElement('canvas');
+      sourceCanvas.width = brandOriginalWidth;
+      sourceCanvas.height = brandOriginalHeight;
+      sourceCanvas.getContext('2d').drawImage(brandImage, 0, 0);
+
+      const resizedCanvas = document.createElement('canvas');
+      resizedCanvas.width = fitWidth;
+      resizedCanvas.height = fitHeight;
+
+      try {
+        await picaInstance.resize(sourceCanvas, resizedCanvas, {
+          quality: 3,
+          unsharpAmount: 80,
+          unsharpRadius: 0.6,
+          unsharpThreshold: 2
+        });
+
+        let finalCanvas;
+        if (shouldPad && preset && preset.maxHeight !== null) {
+          const padWidth = preset.maxWidth;
+          const padHeight = preset.maxHeight;
+          finalCanvas = document.createElement('canvas');
+          finalCanvas.width = padWidth;
+          finalCanvas.height = padHeight;
+          const finalCtx = finalCanvas.getContext('2d');
+
+          const bgColor = brandBgMode === 'auto' ? detectEdgeColor(resizedCanvas) : brandBgMode;
+          finalCtx.fillStyle = bgColor;
+          finalCtx.fillRect(0, 0, padWidth, padHeight);
+
+          const offsetX = Math.round((padWidth - fitWidth) / 2);
+          const offsetY = Math.round((padHeight - fitHeight) / 2);
+          finalCtx.drawImage(resizedCanvas, offsetX, offsetY);
+        } else {
+          finalCanvas = resizedCanvas;
+        }
+
+        brandCurrentCanvas = finalCanvas;
+        const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+        const quality = format === 'jpeg' ? 0.92 : undefined;
+        brandPreview.src = finalCanvas.toDataURL(mimeType, quality);
+      } catch (err) {
+        console.error('Brand resize failed:', err);
+      }
+
+      brandPreviewContainer.classList.remove('loading');
+      brandIsResizing = false;
+      if (brandPendingResize) {
+        brandPendingResize = false;
+        brandDoResize();
+      }
+    }
+
+    brandDownloadBtn.addEventListener('click', () => {
+      if (!brandCurrentCanvas) return;
+      const format = brandFormatSelect.value;
+      const extension = format === 'jpeg' ? 'jpg' : 'png';
+      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      const quality = format === 'jpeg' ? 0.92 : undefined;
+      const filename = brandFilenameInput.value || 'brand-logo';
+
+      const link = document.createElement('a');
+      link.download = `${filename}.${extension}`;
+      link.href = brandCurrentCanvas.toDataURL(mimeType, quality);
+      link.click();
+    });
+
+    brandCopyBtn.addEventListener('click', async () => {
+      if (!brandCurrentCanvas) return;
+      try {
+        const blob = await new Promise(resolve => brandCurrentCanvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+
+        const originalHTML = brandCopyBtn.innerHTML;
+        brandCopyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        brandCopyBtn.classList.add('btn-success');
+        setTimeout(() => {
+          brandCopyBtn.innerHTML = originalHTML;
+          brandCopyBtn.classList.remove('btn-success');
+        }, 1500);
+      } catch (err) {
+        console.error('Copy failed:', err);
+        alert('Copy failed. Your browser may not support clipboard access.');
+      }
+    });
+
+    brandResetBtn.addEventListener('click', () => {
+      brandImage = null;
+      brandCurrentCanvas = null;
+      currentBrandData = null;
+      brandResults.innerHTML = '';
+      brandResults.classList.remove('loading', 'no-results');
+      brandSearch.value = '';
+      brandLogoCard.classList.add('hidden');
+      brandPreviewSection.classList.add('hidden');
+      brandPresetSelect.value = 'thumbnail';
+      brandCustomDimensions.classList.add('hidden');
+      brandAspectRow.classList.add('hidden');
+      brandFormatSelect.value = 'png';
+      brandFilenameInput.value = '';
+      brandOutputDimensions.textContent = '';
+      brandPadToFit.checked = false;
+      brandBgColorRow.classList.add('hidden');
+      brandBgMode = 'auto';
+      document.querySelectorAll('#brandBgColorRow .bg-option').forEach(b => b.classList.remove('active'));
+      brandBgAuto.classList.add('active');
+      brandUpscaleWarning.classList.remove('visible');
+    });
+
+    // Brand batch export
+    const brandBatchToggle = document.getElementById('brandBatchToggle');
+    const brandBatchContent = document.getElementById('brandBatchContent');
+    const brandBatchHeader = document.getElementById('brandBatchHeader');
+    const brandExportAllBtn = document.getElementById('brandExportAllBtn');
+    const brandBatchPad = document.getElementById('brandBatchPad');
+
+    brandBatchHeader.addEventListener('click', () => {
+      brandBatchContent.classList.toggle('hidden');
+      brandBatchToggle.classList.toggle('open');
+    });
+
+    brandExportAllBtn.addEventListener('click', async () => {
+      if (!brandImage) return;
+
+      const selectedPresets = Array.from(brandBatchContent.querySelectorAll('.batch-options input:checked')).map(cb => cb.value);
+      if (selectedPresets.length === 0) {
+        alert('Please select at least one size to export.');
+        return;
+      }
+
+      const shouldPad = brandBatchPad.checked;
+      const format = brandFormatSelect.value;
+      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      const extension = format === 'jpeg' ? 'jpg' : 'png';
+      const quality = format === 'jpeg' ? 0.92 : undefined;
+      const filename = brandFilenameInput.value || 'brand-logo';
+
+      brandExportAllBtn.disabled = true;
+      const originalHTML = brandExportAllBtn.innerHTML;
+
+      for (let i = 0; i < selectedPresets.length; i++) {
+        brandExportAllBtn.innerHTML = `Exporting ${i + 1}/${selectedPresets.length}...`;
+        try {
+          const canvas = await resizeForPreset(brandImage, brandOriginalWidth, brandOriginalHeight, selectedPresets[i], shouldPad, brandBgMode);
+          if (canvas) {
+            const link = document.createElement('a');
+            link.download = `${filename}-${selectedPresets[i]}.${extension}`;
+            link.href = canvas.toDataURL(mimeType, quality);
+            link.click();
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+        } catch (err) {
+          console.error(`Failed to export ${selectedPresets[i]}:`, err);
+        }
+      }
+
+      brandExportAllBtn.disabled = false;
+      brandExportAllBtn.innerHTML = originalHTML;
+    });
+
+    // Search event listeners
+    searchBtn.addEventListener('click', () => {
+      const query = brandSearch.value.trim();
+      if (query) searchBrands(query);
+    });
+
+    brandSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const query = brandSearch.value.trim();
+        if (query) searchBrands(query);
+      }
     });
   </script>
 </body>
