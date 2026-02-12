@@ -6,6 +6,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const query = url.searchParams.get('q');
   const domain = url.searchParams.get('domain');
+  const imgUrl = url.searchParams.get('img');
 
   // CORS headers
   const corsHeaders = {
@@ -17,6 +18,29 @@ export async function onRequest(context) {
   // Handle preflight
   if (request.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Image proxy endpoint (no API key needed)
+  if (imgUrl) {
+    try {
+      const response = await fetch(imgUrl);
+      const contentType = response.headers.get('Content-Type') || 'image/png';
+      const imageData = await response.arrayBuffer();
+
+      return new Response(imageData, {
+        status: response.status,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    } catch (error) {
+      return new Response('Failed to fetch image', {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
   }
 
   const apiKey = env.BRANDFETCH_API_KEY;
