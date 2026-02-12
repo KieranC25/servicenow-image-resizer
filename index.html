@@ -1234,7 +1234,7 @@
   <script>
     // Initialize Pica with high quality settings (shared)
     const picaInstance = pica({
-      features: ['js', 'wasm', 'ww'],
+      features: ['js', 'wasm'],
     });
 
     const presets = {
@@ -1953,7 +1953,7 @@
         brandOriginalHeight = img.height;
 
         brandOriginalDimensions.textContent = `${brandOriginalWidth} × ${brandOriginalHeight}px`;
-        brandPreviewSection.classList.remove('hidden');
+        brandPreviewSection.classList.add('visible');
 
         brandSelectBestPreset();
         brandUpdatePreview();
@@ -2216,7 +2216,7 @@
       brandResults.classList.remove('loading', 'no-results', 'has-results');
       brandSearch.value = '';
       brandLogoCard.classList.add('hidden');
-      brandPreviewSection.classList.add('hidden');
+      brandPreviewSection.classList.remove('visible');
       brandPresetSelect.value = 'thumbnail';
       brandCustomDimensions.classList.add('hidden');
       brandAspectRow.classList.add('hidden');
