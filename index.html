@@ -650,9 +650,31 @@
     }
 
     /* Brand Search Styles */
+    .searchzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      transition: all 0.25s ease;
+      background: var(--bg-raised);
+    }
+    .searchzone h3 {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 550;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .searchzone p {
+      font-size: 0.83rem;
+      color: var(--text-dim);
+    }
     .search-box {
       display: flex;
       gap: 0.5rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .search-box input {
       flex: 1;
@@ -662,21 +684,25 @@
     }
 
     .brand-results {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
       gap: 0.75rem;
-      max-height: 280px;
+      max-height: 220px;
       overflow-y: auto;
-      padding: 0.5rem;
+      padding: 0.75rem;
       background: var(--bg-surface);
       border-radius: var(--radius);
       border: 1px solid var(--border);
+      margin-top: 1rem;
     }
-    .brand-results:empty::after {
-      content: 'Search for a brand to see logos';
-      grid-column: 1 / -1;
+    .brand-results.has-results {
+      display: grid;
+    }
+    .brand-results.loading,
+    .brand-results.no-results {
+      display: block;
       text-align: center;
-      padding: 2rem;
+      padding: 1.5rem;
       color: var(--text-dim);
       font-size: 0.85rem;
     }
@@ -1035,12 +1061,19 @@
         </div>
 
         <div class="card">
-          <div class="card-header">Search Brands</div>
-          <div class="search-box">
-            <input type="text" id="brandSearch" placeholder="Search brand name or domain...">
-            <button class="btn btn-primary" id="searchBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            </button>
+          <div class="searchzone" id="searchZone">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+            </div>
+            <h3>Search for brand logos</h3>
+            <p>Enter a company name or domain</p>
+            <div class="search-box" style="margin-top: 1.25rem;">
+              <input type="text" id="brandSearch" placeholder="e.g. Microsoft, apple.com...">
+              <button class="btn btn-primary" id="searchBtn">Search</button>
+            </div>
           </div>
           <div class="brand-results" id="brandResults"></div>
           <p class="api-notice">Logos powered by <a href="https://brandfetch.com" target="_blank" rel="noopener">Brandfetch</a></p>
@@ -1820,6 +1853,7 @@
 
     async function searchBrands(query) {
       brandResults.innerHTML = '';
+      brandResults.classList.remove('has-results', 'no-results');
       brandResults.classList.add('loading');
 
       try {
@@ -1834,7 +1868,7 @@
           return;
         }
 
-        brandResults.classList.remove('no-results');
+        brandResults.classList.add('has-results');
 
         results.slice(0, 12).forEach(brand => {
           const card = document.createElement('div');
@@ -1848,8 +1882,9 @@
         });
       } catch (err) {
         console.error('Search error:', err);
-        brandResults.classList.remove('loading');
-        brandResults.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--error);">Search failed. Please try again.</div>';
+        brandResults.classList.remove('loading', 'has-results');
+        brandResults.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--error);">Search failed. Please try again.</div>';
+        brandResults.classList.add('no-results');
       }
     }
 
@@ -2175,7 +2210,7 @@
       brandCurrentCanvas = null;
       currentBrandData = null;
       brandResults.innerHTML = '';
-      brandResults.classList.remove('loading', 'no-results');
+      brandResults.classList.remove('loading', 'no-results', 'has-results');
       brandSearch.value = '';
       brandLogoCard.classList.add('hidden');
       brandPreviewSection.classList.add('hidden');
