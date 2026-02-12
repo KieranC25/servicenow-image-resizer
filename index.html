@@ -130,7 +130,10 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
-      align-items: start;
+      align-items: stretch;
+    }
+    .main-layout > .column > .card:first-of-type {
+      flex: 1;
     }
 
     .column {
@@ -217,6 +220,10 @@
       transition: all 0.25s ease;
       background: var(--bg-raised);
       position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .dropzone:hover, .dropzone.dragover {
       border-color: var(--accent);
@@ -657,6 +664,10 @@
       text-align: center;
       transition: all 0.25s ease;
       background: var(--bg-raised);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .searchzone h3 {
       font-family: var(--font-body);
@@ -1074,9 +1085,9 @@
               <input type="text" id="brandSearch" placeholder="e.g. Microsoft, apple.com...">
               <button class="btn btn-primary" id="searchBtn">Search</button>
             </div>
+            <p class="api-notice" style="margin-top: 1rem;">Logos powered by <a href="https://brandfetch.com" target="_blank" rel="noopener">Brandfetch</a></p>
           </div>
           <div class="brand-results" id="brandResults"></div>
-          <p class="api-notice">Logos powered by <a href="https://brandfetch.com" target="_blank" rel="noopener">Brandfetch</a></p>
         </div>
 
         <div class="card hidden" id="brandLogoCard">
