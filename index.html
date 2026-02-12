@@ -130,10 +130,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
-      align-items: stretch;
-    }
-    .main-layout > .column > .card:first-of-type {
-      flex: 1;
+      align-items: start;
     }
 
     .column {
@@ -214,16 +211,12 @@
     .dropzone {
       border: 2px dashed var(--border);
       border-radius: var(--radius-lg);
-      padding: 2.5rem 2rem;
+      padding: 2rem 2rem 1.5rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
       background: var(--bg-raised);
       position: relative;
-      min-height: 280px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
     }
     .dropzone:hover, .dropzone.dragover {
       border-color: var(--accent);
@@ -660,14 +653,10 @@
     .searchzone {
       border: 2px dashed var(--border);
       border-radius: var(--radius-lg);
-      padding: 2.5rem 2rem;
+      padding: 2rem 2rem 1.5rem;
       text-align: center;
       transition: all 0.25s ease;
       background: var(--bg-raised);
-      min-height: 280px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
     }
     .searchzone h3 {
       font-family: var(--font-body);
