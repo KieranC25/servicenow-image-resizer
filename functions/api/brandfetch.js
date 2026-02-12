@@ -23,12 +23,32 @@ export async function onRequest(context) {
   // Image proxy endpoint (no API key needed)
   if (imgUrl) {
     try {
-      const response = await fetch(imgUrl);
+      // Only allow brandfetch URLs for security
+      if (!imgUrl.includes('brandfetch.io') && !imgUrl.includes('asset.brandfetch')) {
+        return new Response('Invalid image URL', {
+          status: 400,
+          headers: corsHeaders,
+        });
+      }
+
+      const response = await fetch(imgUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; ImageProxy/1.0)',
+        },
+      });
+
+      if (!response.ok) {
+        return new Response(`Image fetch failed: ${response.status}`, {
+          status: response.status,
+          headers: corsHeaders,
+        });
+      }
+
       const contentType = response.headers.get('Content-Type') || 'image/png';
       const imageData = await response.arrayBuffer();
 
       return new Response(imageData, {
-        status: response.status,
+        status: 200,
         headers: {
           ...corsHeaders,
           'Content-Type': contentType,
@@ -36,7 +56,7 @@ export async function onRequest(context) {
         },
       });
     } catch (error) {
-      return new Response('Failed to fetch image', {
+      return new Response(`Failed to fetch image: ${error.message}`, {
         status: 500,
         headers: corsHeaders,
       });
