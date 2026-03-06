@@ -241,6 +241,12 @@ export async function onRequest(context) {
 - **How we fixed it:** Read dimension values inside `doResize` at execution time, and added a `pendingResize` flag to trigger another resize if changes occurred during processing.
 - **Lesson:** With async operations, always read inputs at execution time, not at scheduling time. And if an operation can be interrupted, track whether a re-run is needed.
 
+### Bug #3: Brandfetch Errors Were Being Flattened Into Generic Failures
+- **What happened:** If Brandfetch returned an auth error, quota error, or another non-JSON response, the proxy could turn that into a generic 500, and the UI would only show "Search failed."
+- **Why it happened:** The Cloudflare function always called `response.json()` even for non-JSON upstream responses. Then the frontend ignored the proxy's error payloads and threw generic errors on any non-OK status.
+- **How we fixed it:** The proxy now checks the upstream `Content-Type`, passes JSON through safely, and wraps plain-text failures in a JSON `{ error }` response without losing the original status code. The frontend now parses that payload and shows the actual error message to the user.
+- **Lesson:** Error handling is part of the product, not cleanup code. Preserve upstream status and message details wherever possible, otherwise users lose the one piece of information that would tell them how to recover.
+
 ### Feature: Pad to Exact Size (Letterboxing)
 Sometimes you need exact dimensions (e.g., 150×150 for a thumbnail) but your image is a different aspect ratio (e.g., 150×100). Instead of stretching, we:
 1. Resize to fit within bounds (150×100)

@@ -8,6 +8,25 @@ export async function onRequest(context) {
   const domain = url.searchParams.get('domain');
   const imgUrl = url.searchParams.get('img');
 
+  async function buildJsonResponse(response) {
+    const contentType = response.headers.get('Content-Type') || '';
+    let payload;
+
+    if (contentType.includes('application/json')) {
+      payload = await response.text();
+    } else {
+      const text = (await response.text()).trim();
+      payload = JSON.stringify({
+        error: text || `Brandfetch request failed with status ${response.status}`,
+      });
+    }
+
+    return new Response(payload, {
+      status: response.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   // CORS headers
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -88,11 +107,7 @@ export async function onRequest(context) {
         },
       });
 
-      const data = await response.json();
-      return new Response(JSON.stringify(data), {
-        status: response.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return buildJsonResponse(response);
     }
 
     // Brand details endpoint (fetch full brand data including logos)
@@ -104,11 +119,7 @@ export async function onRequest(context) {
         },
       });
 
-      const data = await response.json();
-      return new Response(JSON.stringify(data), {
-        status: response.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return buildJsonResponse(response);
     }
 
     return new Response(
